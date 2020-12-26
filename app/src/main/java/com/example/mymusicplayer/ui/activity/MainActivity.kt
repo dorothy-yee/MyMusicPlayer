@@ -5,7 +5,9 @@ import android.widget.Toolbar
 import androidx.annotation.RequiresApi
 import com.example.mymusicplayer.R
 import com.example.mymusicplayer.base.BaseActivity
+import com.example.mymusicplayer.util.FragmentUtil
 import com.example.mymusicplayer.util.ToolBarManager
+import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.find
 
 class MainActivity : BaseActivity(),ToolBarManager {
@@ -20,6 +22,19 @@ class MainActivity : BaseActivity(),ToolBarManager {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun initData() {
         initMainToolBar()
+    }
+
+    override fun initListener() {
+        //设置tab切换监听
+        bottomBar.setOnTabReselectListener{
+             val transaction = supportFragmentManager.beginTransaction()
+            //it代表tabid
+            FragmentUtil.fragmentUtil.getFragment(it)?.let { it1 ->
+                transaction.replace(R.id.container,
+                    it1,it.toString())
+            }
+            transaction.commit()
+        }
     }
 
 }

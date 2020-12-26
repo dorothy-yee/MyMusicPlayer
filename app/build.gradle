@@ -39,4 +39,7 @@ dependencies {
     //bottom-bar
     compile 'com.roughike:bottom-bar:2.3.1'
 
+    //okhttp3
+    implementation("com.squareup.okhttp3:okhttp:4.9.0")
+
 }
