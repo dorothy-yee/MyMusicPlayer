@@ -17,12 +17,14 @@ import com.example.mymusicplayer.R
 import com.example.mymusicplayer.adapter.MusicAdapter
 import com.example.mymusicplayer.base.BaseFragment
 import com.example.mymusicplayer.model.AudioBean
+import com.example.mymusicplayer.ui.activity.MusicPlayerActivity
 import com.example.mymusicplayer.util.CursorUtil
 import kotlinx.android.synthetic.main.fragment_music.*
 import okhttp3.internal.http2.Http2Reader
 import org.jetbrains.anko.internals.AnkoInternals.createAnkoContext
 import org.jetbrains.anko.noButton
 import org.jetbrains.anko.support.v4.alert
+import org.jetbrains.anko.support.v4.startActivity
 import org.jetbrains.anko.yesButton
 import java.util.logging.Handler
 import java.util.logging.LogRecord
@@ -78,7 +80,7 @@ class MusicFragment : BaseFragment() {
             //没有获取
             if (ActivityCompat.shouldShowRequestPermissionRationale(activity!!, permission)) {
                 //需要弹出
-                alert ("我们只会访问音乐文件，不会访问隐私照片", "温馨提示") {
+                alert ("本次访问只访问音乐文件，不访问隐私照片", "温馨提示") {
                     yesButton { myRequestPermission() }
                     noButton {  }
                 }.show()
@@ -96,7 +98,7 @@ class MusicFragment : BaseFragment() {
     }
 
     //接收权限授权结果
-    //requestcode请求码
+    //requestCode请求码
     //permissions权限申请数组
     //grantResults申请之后的结果
     override fun onRequestPermissionsResult(requestCode: Int,permissions: Array<out String>,grantResults: IntArray) {
@@ -170,15 +172,15 @@ class MusicFragment : BaseFragment() {
         adapter = MusicAdapter(context, null)
         listView.adapter = adapter
         //设置条目点击事件
-//        listView.setOnItemClickListener { adapterView, view, i, _ ->
-//            //获取数据集合
-//            val cursor = adapter?.getItem(i) as Cursor
-//            //通过当前位置cursor获取整个播放列表
-//            val list:ArrayList<AudioBean> = AudioBean.getAudioBeans(cursor)
-//            //位置position
-//            //跳转到音乐播放界面
-//            startActivity<AudioPlayerActivity>("list" to list, "position" to i)
-//        }
+        listView.setOnItemClickListener { adapterView, view, i, _ ->
+            //获取数据集合
+            val cursor = adapter?.getItem(i) as Cursor
+            //通过当前位置cursor获取整个播放列表
+            val list:ArrayList<AudioBean> = AudioBean.getAudioBeans(cursor)
+            //位置position
+            //跳转到音乐播放界面
+            startActivity<MusicPlayerActivity>("list" to list, "position" to i)
+        }
     }
 
     //音乐查询异步任务

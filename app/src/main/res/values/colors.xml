@@ -3,4 +3,10 @@
     <color name="colorPrimary">#d08c9d</color>
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
+
+    <color name="gray">#dedcdc</color>
+    <color name="green">#ff1ec399</color>
+    <color name="white">#fff</color>
+    <color name="home_item_bg">#7f000000</color>
+    <color name="colorMusicProgress">#d08c9d</color>
 </resources>
