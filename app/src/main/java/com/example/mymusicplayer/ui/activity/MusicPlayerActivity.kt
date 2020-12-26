@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Message
 import android.view.View
+import android.widget.SeekBar
 import com.example.mymusicplayer.R
 import com.example.mymusicplayer.base.BaseActivity
 import com.example.mymusicplayer.model.AudioBean
@@ -22,7 +23,7 @@ import kotlinx.android.synthetic.main.activity_music_player_top.*
  * 包名： com.example.mymusicplayer.ui.activity
  * 类说明：
  */
-class MusicPlayerActivity:BaseActivity(), View.OnClickListener {
+class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBarChangeListener {
     var audioBean:AudioBean ?= null
     var duration:Int = 0
     val handler = object :Handler(){
@@ -36,6 +37,29 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener {
     override fun onClick(v: View?) {
         when(v?.id){
             R.id.state -> updatePlayState()
+            R.id.mode -> updatePlayMode()
+        }
+    }
+
+    //更新播放模式
+    private fun updatePlayMode() {
+        //修改service中mode
+        iService?.updatePlayMode()
+        //修改界面模式图标
+        updatePlayModeBtn()
+    }
+
+    //根据播放模式切换图标
+    private fun updatePlayModeBtn() {
+        iService?.let {
+            //获取播放模式
+            val modeI:Int =  it.getPlayMode()
+            //设置图标
+            when(modeI){
+                MusicService.MODE_ALL -> mode.setImageResource(R.drawable.selector_btn_playmode_order)
+                MusicService.MODE_SINGLE -> mode.setImageResource(R.drawable.selector_btn_playmode_single)
+                MusicService.MODE_RANDOM -> mode.setImageResource(R.drawable.selector_btn_playmode_random)
+            }
         }
     }
 
@@ -51,6 +75,8 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener {
         updatePlayStateBtn()
         //获取总进度
         duration = iService?.getDuration()?:0
+        //获取进度条最大值
+        progress_sk.max = duration
         //更新播放进度
         startUpdateProgress()
     }
@@ -69,6 +95,8 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener {
     private fun updateProgress(pro: Int) {
         //更新进度数值
         progress.text = StringUtil.parseDuration(pro)+"/"+StringUtil.parseDuration(duration)
+        //更新进度条
+        progress_sk.setProgress(pro)
     }
 
 
@@ -89,9 +117,13 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener {
             if (isPlaying){
                 //播放图标
                 state.setImageResource(R.drawable.selector_btn_audio_play)
+                //开启进度更新
+                handler.sendEmptyMessage(MSG_PROGRESS)
             }else {
                 //暂停图标
                 state.setImageResource(R.drawable.selector_btn_audio_pause)
+                //停止更新进度
+                handler.removeMessages(MSG_PROGRESS)
             }
         }
     }
@@ -100,6 +132,10 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener {
         //播放状态切换
         state.setOnClickListener(this)
         back.setOnClickListener { finish() }
+        //进度条变化监听
+        progress_sk.setOnSeekBarChangeListener(this)
+        //播放模式点击事件
+        mode.setOnClickListener(this)
     }
     override fun getLayoutId(): Int {
         return R.layout.activity_music_player
@@ -157,6 +193,28 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener {
         unbindService(conn)
         //反注册EventBus
         EventBus.getDefault().unregister(this)
+        //清空handler发送的所有消息，防止内存泄漏
+        handler.removeCallbacksAndMessages(null)
+    }
+
+    //进度改变回调
+    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+        //判断是否为用户操作
+        if (!fromUser) return
+        //更新播放进度
+        iService?.seekTo(progress)
+        //更新界面进度显示
+        updateProgress(progress)
+    }
+
+    //手指触摸seekbar回调
+    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+    }
+
+    //手指离开seekbar回调
+    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
     }
 
 }
