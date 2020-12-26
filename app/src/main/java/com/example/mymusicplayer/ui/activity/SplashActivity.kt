@@ -17,7 +17,7 @@ class SplashActivity(): BaseActivity(), ViewPropertyAnimatorListener {
     }
 
     override fun initData() {
-        //欢迎界面缩放，3秒钟
+        //欢迎界面，3秒钟
         ViewCompat.animate(imageView).scaleX(1.0f).scaleY(1.0f).setListener(this).duration = 3000
     }
 
