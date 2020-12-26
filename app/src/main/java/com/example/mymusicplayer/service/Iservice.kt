@@ -6,10 +6,12 @@ package com.example.mymusicplayer.service
  */
 interface Iservice {
     fun updatePlayState()
-    fun isPlaying():Boolean?
+    fun isPlaying(): Boolean?
     fun getDuration(): Int
     fun getProgress(): Int
     fun seekTo(progress: Int)
     fun updatePlayMode()
     fun getPlayMode(): Int
+    fun playPre()
+    fun playNext()
 }

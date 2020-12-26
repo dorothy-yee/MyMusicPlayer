@@ -16,7 +16,7 @@ import kotlin.random.Random
 class MusicService:Service() {
     var mediaPlayer:MediaPlayer ?= null
     var list:ArrayList<AudioBean> ?= null
-    var position :Int = 0
+    var position :Int = -2
     val binder by lazy { MusicBinder() }
     companion object{
         val MODE_ALL = 1
@@ -29,11 +29,19 @@ class MusicService:Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        //获取集合，position
-        list = intent?.getParcelableArrayListExtra<AudioBean>("list")
-        position = intent?.getIntExtra("position",-1)?:-1
-        //开始播放音乐
-        binder.playItem()
+        val pos = intent?.getIntExtra("position",-1)?:-1
+        if (pos != position){ //想要播放！= 正在播放
+            position = pos
+            println("intent=$intent")
+            //获取集合，position
+            list = intent?.getParcelableArrayListExtra<AudioBean>("list")
+            //开始播放音乐
+            binder.playItem()
+        }else{
+            //主动通知界面更新
+            binder.notifyUpdateUi()
+        }
+
         //START_NOT_STICKY 非粘性 service杀死不会尝试重新启动
         return START_NOT_STICKY
     }
@@ -45,7 +53,14 @@ class MusicService:Service() {
     inner class MusicBinder:Binder(),Iservice, MediaPlayer.OnPreparedListener,
         MediaPlayer.OnCompletionListener {
         fun playItem(){
-        mediaPlayer = MediaPlayer()
+            //如果mediaPlayer已经存在就销毁
+            if(mediaPlayer!=null){
+                mediaPlayer?.reset()
+                mediaPlayer?.release()
+                mediaPlayer = null
+
+            }
+            mediaPlayer = MediaPlayer()
             mediaPlayer?.let {
                 it.setOnPreparedListener(this)
                 it.setOnCompletionListener(this)
@@ -62,7 +77,7 @@ class MusicService:Service() {
         }
 
         //通知界面更新
-        private fun notifyUpdateUi() {
+        fun notifyUpdateUi() {
             //发送端
             EventBus.getDefault().post(list?.get(position))
         }
@@ -114,6 +129,36 @@ class MusicService:Service() {
         //获取播放模式
         override fun getPlayMode(): Int {
             return mode
+        }
+
+        //上一首
+        override fun playPre() {
+            list?.let {
+                //获取要播放歌曲position
+                when (mode) {
+                    MODE_RANDOM -> list?.let { position = Random.nextInt(it.size - 1) }
+                    else -> {
+                        if (position == 0) {
+                            position = it.size - 1
+                        } else {
+                            position--
+                        }
+                    }
+                }
+                //playItem
+                playItem()
+            }
+        }
+
+        //下一首
+        override fun playNext() {
+            list?.let {
+                when(mode){
+                    MODE_RANDOM->position = Random.nextInt(it.size-1)
+                    else->position = (position+1)%it.size
+                }
+            }
+            playItem()
         }
 
         //歌曲播放完成之后回调

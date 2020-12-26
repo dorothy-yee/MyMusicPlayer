@@ -38,6 +38,8 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
         when(v?.id){
             R.id.state -> updatePlayState()
             R.id.mode -> updatePlayMode()
+            R.id.pre -> iService?.playPre()
+            R.id.next -> iService?.playNext()
         }
     }
 
@@ -79,6 +81,8 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
         progress_sk.max = duration
         //更新播放进度
         startUpdateProgress()
+        //更新播放模式图标
+        updatePlayModeBtn()
     }
 
     //开始更新进度
@@ -136,6 +140,10 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
         progress_sk.setOnSeekBarChangeListener(this)
         //播放模式点击事件
         mode.setOnClickListener(this)
+        //上一首
+        pre.setOnClickListener(this)
+        //下一首
+        next.setOnClickListener(this)
     }
     override fun getLayoutId(): Int {
         return R.layout.activity_music_player
@@ -157,10 +165,11 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
         //通过intent传list，position
 //        intent.putExtra("list",list)
 //        intent.putExtra("position",position)
-        //先开启
-        startService(intent)
-        //再绑定
+
+        //先绑定
         bindService(intent,conn, BIND_AUTO_CREATE)
+        //再开启
+        startService(intent)
 
 
         //播放音乐
