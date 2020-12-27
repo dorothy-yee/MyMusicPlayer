@@ -57,8 +57,8 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
             val adapter = PopAdapter(list)
             //获取底部高度
             val bottomH = audio_player_bottom.height
-            val popWindow = PlayListPopWindow(this,adapter,this,window)
-            popWindow.showAsDropDown(audio_player_bottom,0,-bottomH)
+            val popWindow = PlayListPopWindow(this, adapter,this,window)
+            popWindow.showAsDropDown(audio_player_bottom,0,bottomH)
         }
     }
 

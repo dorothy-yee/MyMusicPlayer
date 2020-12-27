@@ -38,7 +38,7 @@ class PlayListPopWindow(context:Context, adapter: BaseAdapter, listener: Adapter
         manager.defaultDisplay.getSize(point)
         val windowH = point.y
 //        height = (windowH*3)/5
-        height = windowH
+        height = windowH/2
         //设置获取焦点
         isFocusable = true
         //设置外部点击
