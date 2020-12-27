@@ -161,6 +161,17 @@ class MusicService:Service() {
             playItem()
         }
 
+        //获取播放集合
+        override fun getPlayList(): List<AudioBean>? {
+            return list
+        }
+
+        //播放当前位置的歌曲
+        override fun playPostion(position: Int) {
+            this@MusicService.position = position
+            playItem()
+        }
+
         //歌曲播放完成之后回调
         override fun onCompletion(mp: MediaPlayer?) {
             //自动播放下一首

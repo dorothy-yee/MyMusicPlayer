@@ -1,20 +1,21 @@
 package com.example.mymusicplayer.ui.activity
 
 import android.content.ComponentName
-import android.content.Intent
 import android.content.ServiceConnection
-import android.media.MediaPlayer
 import android.os.Handler
 import android.os.IBinder
 import android.os.Message
 import android.view.View
+import android.widget.AdapterView
 import android.widget.SeekBar
 import com.example.mymusicplayer.R
+import com.example.mymusicplayer.adapter.PopAdapter
 import com.example.mymusicplayer.base.BaseActivity
 import com.example.mymusicplayer.model.AudioBean
 import com.example.mymusicplayer.service.Iservice
 import com.example.mymusicplayer.service.MusicService
 import com.example.mymusicplayer.util.StringUtil
+import com.example.mymusicplayer.widget.PlayListPopWindow
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.activity_music_player_bottom.*
 import kotlinx.android.synthetic.main.activity_music_player_top.*
@@ -23,7 +24,9 @@ import kotlinx.android.synthetic.main.activity_music_player_top.*
  * 包名： com.example.mymusicplayer.ui.activity
  * 类说明：
  */
-class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBarChangeListener {
+class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBarChangeListener,
+    AdapterView.OnItemClickListener {
+
     var audioBean:AudioBean ?= null
     var duration:Int = 0
     val handler = object :Handler(){
@@ -40,6 +43,22 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
             R.id.mode -> updatePlayMode()
             R.id.pre -> iService?.playPre()
             R.id.next -> iService?.playNext()
+            R.id.playlist -> showPlayList()
+        }
+    }
+
+
+    //显示播放列表
+    private fun showPlayList() {
+        window
+        val list = iService?.getPlayList()
+        list?.let {
+            //创建adapter
+            val adapter = PopAdapter(list)
+            //获取底部高度
+            val bottomH = audio_player_bottom.height
+            val popWindow = PlayListPopWindow(this,adapter,this,window)
+            popWindow.showAsDropDown(audio_player_bottom,0,-bottomH)
         }
     }
 
@@ -144,6 +163,8 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
         pre.setOnClickListener(this)
         //下一首
         next.setOnClickListener(this)
+        //播放列表
+        playlist.setOnClickListener(this)
     }
     override fun getLayoutId(): Int {
         return R.layout.activity_music_player
@@ -224,6 +245,12 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
     //手指离开seekbar回调
     override fun onStopTrackingTouch(seekBar: SeekBar?) {
 
+    }
+
+    //弹出的播放列表条目点击事件
+    override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        //播放当前歌曲
+        iService?.playPostion(position)
     }
 
 }
