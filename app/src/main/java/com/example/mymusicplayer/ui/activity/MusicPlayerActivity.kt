@@ -18,6 +18,7 @@ import com.example.mymusicplayer.util.StringUtil
 import com.example.mymusicplayer.widget.PlayListPopWindow
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.activity_music_player_bottom.*
+import kotlinx.android.synthetic.main.activity_music_player_middle.*
 import kotlinx.android.synthetic.main.activity_music_player_top.*
 
 /**
@@ -86,6 +87,8 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
 
     //接收EventBus方法
     fun onEventMainThread(itemBean: AudioBean){
+        //设置播放歌曲名称
+        lyricView.setSongName(itemBean.display_name)
         //记录播放歌曲
         this.audioBean = itemBean
         //歌曲名
@@ -96,6 +99,8 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
         updatePlayStateBtn()
         //获取总进度
         duration = iService?.getDuration()?:0
+        //设置歌词播放总进度
+        lyricView.setSongDuration(duration)
         //获取进度条最大值
         progress_sk.max = duration
         //更新播放进度
@@ -111,7 +116,7 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
         //更新进度
         updateProgress(progress)
         //定时获取进度,1s
-        handler.sendEmptyMessageDelayed(MSG_PROGRESS,1000)
+        handler.sendEmptyMessage(MSG_PROGRESS)
     }
 
     //根据当前数据进度更新界面
@@ -120,6 +125,8 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
         progress.text = StringUtil.parseDuration(pro)+"/"+StringUtil.parseDuration(duration)
         //更新进度条
         progress_sk.setProgress(pro)
+        //更新歌词播放进度
+        lyricView.updateProgress(pro)
     }
 
 
@@ -165,6 +172,13 @@ class MusicPlayerActivity:BaseActivity(), View.OnClickListener, SeekBar.OnSeekBa
         next.setOnClickListener(this)
         //播放列表
         playlist.setOnClickListener(this)
+        //歌词拖动进度更新监听
+        lyricView.setProgressListener {
+            //更新当前播放进度
+            iService?.seekTo(it)
+            //更新进度显示
+            updateProgress(it)
+        }
     }
     override fun getLayoutId(): Int {
         return R.layout.activity_music_player
